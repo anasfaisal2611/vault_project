@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Access Vault</title>
+</head>
+<body>
+
+<h2>Access Vault</h2>
+<input id="password" placeholder="Password (if required)">
+<button onclick="access()">Access</button>
+
+<pre id="output"></pre>
+
+<script>
+const linkId = new URLSearchParams(window.location.search).get("id");
+
+async function access() {
+    const res = await fetch(`http://127.0.0.1:5000/access/${linkId}`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({password: password.value})
+    });
+
+    const data = await res.json();
+    output.textContent = JSON.stringify(data, null, 2);
+}
+</script>
+</body>
+</html>

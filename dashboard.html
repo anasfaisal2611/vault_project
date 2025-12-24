@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+
+<h2>Create Vault</h2>
+<input id="title" placeholder="Title"><br><br>
+<textarea id="content" placeholder="Secret text"></textarea><br><br>
+<button onclick="createVault()">Create</button>
+
+<hr>
+
+<h2>Your Vaults</h2>
+<ul id="vaults"></ul>
+
+<script>
+const token = localStorage.getItem("token");
+
+async function createVault() {
+    await fetch("http://127.0.0.1:5000/vault", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+            title: title.value,
+            content: content.value
+        })
+    });
+    loadVaults();
+}
+
+async function loadVaults() {
+    const res = await fetch("http://127.0.0.1:5000/vault", {
+        headers: {"Authorization": "Bearer " + token}
+    });
+
+    const data = await res.json();
+    vaults.innerHTML = "";
+
+    data.forEach(v => {
+        vaults.innerHTML += `
+        <li>
+            ${v.title}
+            <button onclick="createShare(${v.id})">Share</button>
+        </li>`;
+    });
+}
+
+async function createShare(id) {
+    const hours = prompt("Expiry (hours):");
+    const views = prompt("Max views:");
+    const password = prompt("Password (optional):");
+
+    const res = await fetch(`http://127.0.0.1:5000/share/${id}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+            hours: Number(hours),
+            views: Number(views),
+            password: password
+        })
+    });
+
+    const data = await res.json();
+    alert("Share link: http://127.0.0.1:5000" + data.share_link);
+}
+
+loadVaults();
+</script>
+</body>
+</html>
